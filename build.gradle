@@ -1,0 +1,61 @@
+plugins {
+    id 'com.google.cloud.tools.jib' version '1.8.0'
+}
+
+// serves as a developer repo. Can use developer's initial. So, each and every developer
+// will have their own directory to save their images.
+def service_name = 'gschedules'
+// serves the projectID. Helpful in switching environments('live' and 'staging')
+def project_id = 'staging-cloudrun'
+// serves the image name. Usually, developer repo value
+// followed by buildOrTaskName/Version. (devRepo:0.1)
+def image_name = service_name + ':0.1'
+
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'base'
+
+compileJava {
+    sourceCompatibility = 11
+    targetCompatibility = 11
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
+    compile 'org.springframework:spring-webmvc:5.0.2.RELEASE'
+}
+
+task gradlew(type: Wrapper) {
+    // No need of installing gradle anymore, we have the wrapper support
+    // Included Gradle of version 5.4.1, run using the command ./gradlew
+    gradleVersion = '5.4.1'
+}
+
+task buildImage(dependsOn: 'jib') {}
+
+task deployImage(type: Exec) {
+    commandLine "gcloud"
+    args "run", 
+        "deploy", (service_name + "-" + project_id), 
+        "--image", 'gcr.io/' + project_id + '/' + image_name,
+        "--platform", "managed", 
+        "--region", "us-central1",
+        "--allow-unauthenticated",
+        "--memory", "512Mi"
+}
+
+task buildAndDeploy() {
+    dependsOn build
+    dependsOn buildImage
+    dependsOn deployImage
+}
+
+jib {
+    from.image = 'gcr.io/distroless/java/jetty:java11'
+    to.image = 'gcr.io/' + project_id + '/' + image_name
+}
