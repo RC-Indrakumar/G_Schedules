@@ -8,6 +8,6 @@ Run > gradle build
 Run > docker build -t image_name .
 
 # To run the application locally
-Run > docker run -d --rm -p 8888:8080 --name container_name image_name
+Run > docker run -d --rm -p 8888:8080 --name image_name container_name
 
 # Application serving in https://gschedules-staging-cloudrun-6vxx5cpkwa-uc.a.run.app
