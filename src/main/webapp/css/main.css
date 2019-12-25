@@ -113,6 +113,10 @@ hr {
     border-color: #4caf50 !important;
 }
 
+.past_task {
+    border-color: #FFC107 !important;
+}
+
 #links img {
     width:40px;
     height: 40px;
